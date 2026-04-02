@@ -38,16 +38,16 @@ pip install -r eval/deepeval/requirements.txt
 ## Running
 
 ```bash
-# Run all three Phase 1 harnesses and generate the NFR6 report
+# Run all three harnesses and generate the NFR6 report
 make
 
 # Or run individually
 make eval-dfah
 make eval-mcp-eval
-make eval-deepeval-phase1
+make eval-deepeval
 
 # Generate the report separately
-make report-phase1
+make report
 ```
 
 Results land in `results/`. The NFR6 report is at `results/nfr6-phase1-report.json`.
@@ -88,11 +88,11 @@ In CI, pass the image tag via the `workflow_dispatch` input `gemara_mcp_image`, 
 
 | Target | Description |
 |---|---|
-| `make` / `make all` | Run phase 1 eval + generate report |
-| `make eval-phase1` | Run all three harnesses |
+| `make` / `make all` | Run all harnesses + generate report |
+| `make eval` | Run all three harnesses |
 | `make eval-dfah` | DFAH harness only |
 | `make eval-mcp-eval` | mcp-eval harness only |
-| `make eval-deepeval-phase1` | DeepEval Phase 1 only |
-| `make report-phase1` | Generate NFR6 report from existing results |
+| `make eval-deepeval` | DeepEval harness only |
+| `make report` | Generate NFR6 report from existing results |
 | `make compare` | Compare result sets |
 | `make clean` | Remove `results/` |

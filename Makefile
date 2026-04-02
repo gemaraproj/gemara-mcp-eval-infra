@@ -1,4 +1,4 @@
-.PHONY: all eval-phase1 eval-all eval-dfah eval-mcp-eval eval-deepeval-phase1 report report-phase1 compare clean
+.PHONY: all eval eval-dfah eval-mcp-eval eval-deepeval report compare clean
 
 -include .env
 export
@@ -9,7 +9,7 @@ ANALYSIS_DIR := analysis
 RESULTS_DIR := results
 CONTAINER_RUNTIME ?= docker
 
-all: eval-phase1 report-phase1
+all: eval report
 
 # --- Individual Evaluations ---
 
@@ -27,30 +27,25 @@ eval-mcp-eval: $(RESULTS_DIR)
 		--output ../../$(RESULTS_DIR)/mcp-eval.json
 	@echo "==> mcp-eval complete."
 
-eval-deepeval-phase1: $(RESULTS_DIR)
-	@echo "==> Running DeepEval Phase 1 output determinism (no LLM)..."
+eval-deepeval: $(RESULTS_DIR)
+	@echo "==> Running DeepEval output determinism (no LLM)..."
 	cd $(EVAL_DIR)/deepeval && python3 -m pytest \
 		test_output_determinism.py \
 		--tb=short -q \
-		--json-report --json-report-file=../../$(RESULTS_DIR)/deepeval-phase1.json
-	@echo "==> DeepEval Phase 1 complete."
+		--json-report --json-report-file=../../$(RESULTS_DIR)/deepeval.json
+	@echo "==> DeepEval complete."
 
-eval-all: eval-phase1
-
-eval-phase1: eval-dfah eval-mcp-eval eval-deepeval-phase1
+eval: eval-dfah eval-mcp-eval eval-deepeval
 
 # --- Analysis ---
 
-report-phase1: $(RESULTS_DIR)
-	@echo "==> Generating Phase 1 NFR6 report (output determinism, no LLM)..."
+report: $(RESULTS_DIR)
+	@echo "==> Generating NFR6 output-determinism report..."
 	python3 $(ANALYSIS_DIR)/nfr6_report.py \
-		--phase 1 \
 		--results-dir $(RESULTS_DIR) \
 		--threshold 0.9 \
-		--output $(RESULTS_DIR)/nfr6-phase1-report.json
-	@echo "==> Phase 1 NFR6 report: $(RESULTS_DIR)/nfr6-phase1-report.json"
-
-report: report-phase1
+		--output $(RESULTS_DIR)/nfr6-report.json
+	@echo "==> NFR6 report: $(RESULTS_DIR)/nfr6-report.json"
 
 compare:
 	python3 $(ANALYSIS_DIR)/compare_results.py \

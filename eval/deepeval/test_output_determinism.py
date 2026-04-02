@@ -1,12 +1,12 @@
 """
-Phase 1 output determinism test for validate_gemara_artifact.
+Output determinism test for validate_gemara_artifact.
 
 Calls the live gemara-mcp server N times per scenario and asserts that every
 response is byte-for-byte identical.  No LLM, no Ollama, no GEval — Docker
 for the MCP container is the only external dependency.
 
-Intended to run as part of eval-phase1 (CI gate).  Results are written via
-pytest-json-report to results/deepeval-phase1.json.
+Runs as part of the NFR6 CI gate via `make eval-deepeval`.
+Results are written via pytest-json-report to results/deepeval.json.
 """
 
 import asyncio
@@ -21,8 +21,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 CORPUS_DIR = Path(__file__).resolve().parent.parent.parent / "corpus"
 
 
-def _phase1_det(scenario: dict) -> dict:
-    """Return the phase1 determinism config, falling back to the flat block."""
+def _det_config(scenario: dict) -> dict:
+    """Return the determinism config, falling back to the flat block."""
     det = scenario["determinism"]
     return det.get("phase1", det)
 
@@ -44,7 +44,7 @@ def test_validation_determinism(mcp_client, tool_scenarios):
 
         artifact_content = input_path.read_text()
         definition = scenario["tool_params"]["definition"]
-        det = _phase1_det(scenario)
+        det = _det_config(scenario)
         num_runs = det.get("runs", 20)
         threshold = det.get("threshold", 1.0)
 

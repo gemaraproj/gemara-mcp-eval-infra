@@ -1,12 +1,13 @@
-name: "NFR6 — Output Determinism (Phase 1)"
+name: "NFR6 — Output Determinism"
 
-# NFR6 compliance gate for phase 1 (output determinism, no LLM).
-# Runs on every push and PR to main. Exits 1 if the 90% determinism threshold is not met.
-# No submodules, no LLM, no Ollama, no Node.js required.
+# NFR6 compliance gate. Runs on every push and PR to main.
+# Exits 1 if the 90% determinism threshold is not met.
+# No LLM, no Ollama, no Node.js required.
 #
 # The gemara-mcp image is provided externally:
-#   - In CI: set GEMARA_MCP_IMAGE via the workflow_dispatch input or as a repository secret/var.
-#   - The upstream pipeline builds and pushes the image, then triggers or re-uses this workflow.
+#   - workflow_dispatch: pass via the gemara_mcp_image input
+#   - push/PR: uses the default image tag below
+#   The upstream pipeline builds and pushes the image, then triggers this workflow.
 
 on:
   push:
@@ -48,7 +49,7 @@ jobs:
       - name: Pull gemara-mcp image
         run: docker pull ${{ env.GEMARA_MCP_IMAGE }}
 
-      # --- Per-harness steps — both always run and upload independently
+      # --- Per-harness steps — all always run and upload independently
       #     so a partial failure still produces usable results.
 
       - name: "Harness: dfah"
@@ -61,7 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase1-dfah
+          name: dfah
           path: results/dfah.json
           if-no-files-found: warn
 
@@ -75,54 +76,54 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase1-mcp-eval
+          name: mcp-eval
           path: results/mcp-eval.json
           if-no-files-found: warn
 
-      - name: "Harness: deepeval-phase1"
+      - name: "Harness: deepeval"
         if: always()
         continue-on-error: true
-        id: deepeval-phase1
-        run: make eval-deepeval-phase1
+        id: deepeval
+        run: make eval-deepeval
 
-      - name: Upload deepeval-phase1 results
+      - name: Upload deepeval results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase1-deepeval-phase1
-          path: results/deepeval-phase1.json
+          name: deepeval
+          path: results/deepeval.json
           if-no-files-found: warn
 
-      - name: Print Phase 1 harness summary
+      - name: Print harness summary
         if: always()
         run: |
-          echo "| Harness          | Outcome |"
-          echo "|------------------|---------|"
-          echo "| dfah             | ${{ steps.dfah.outcome }} |"
-          echo "| mcp-eval         | ${{ steps['mcp-eval'].outcome }} |"
-          echo "| deepeval-phase1  | ${{ steps['deepeval-phase1'].outcome }} |"
+          echo "| Harness   | Outcome |"
+          echo "|-----------|---------|"
+          echo "| dfah      | ${{ steps.dfah.outcome }} |"
+          echo "| mcp-eval  | ${{ steps['mcp-eval'].outcome }} |"
+          echo "| deepeval  | ${{ steps.deepeval.outcome }} |"
 
-      - name: Generate Phase 1 NFR6 report
+      - name: Generate NFR6 report
         if: always()
-        run: make report-phase1
+        run: make report
 
-      - name: Upload Phase 1 NFR6 report
+      - name: Upload NFR6 report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase1-report
-          path: results/nfr6-phase1-report.json
+          name: nfr6-report
+          path: results/nfr6-report.json
           if-no-files-found: warn
 
       - name: Check NFR6 threshold
         run: |
           python -c "
           import json, sys
-          with open('results/nfr6-phase1-report.json') as f:
+          with open('results/nfr6-report.json') as f:
               report = json.load(f)
           verdict = report['nfr6_report']['nfr6_verdict']
           score = report['nfr6_report']['overall_determinism_score']
-          print(f'NFR6 Phase 1: {verdict} (score: {score:.1%})')
+          print(f'NFR6: {verdict} (score: {score:.1%})')
           for a in report['per_tool_assessments']:
               s = a['determinism_score']
               s_str = f\"{s:.1%}\" if s is not None else 'N/A'
