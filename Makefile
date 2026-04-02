@@ -9,7 +9,7 @@ ANALYSIS_DIR := analysis
 RESULTS_DIR := results
 CONTAINER_RUNTIME ?= docker
 
-all: eval report
+all: corpus-validate eval report
 
 # --- Corpus ---
 

@@ -51,6 +51,7 @@ jobs:
 
       - name: Install Python dependencies
         run: |
+          pip install -r scripts/requirements.txt
           pip install -r eval/dfah/requirements.txt
           pip install -r eval/mcp-eval/requirements.txt
           pip install -r eval/deepeval/requirements.txt
@@ -83,7 +84,7 @@ jobs:
         run: docker pull ${{ env.GEMARA_MCP_IMAGE }}
 
       - name: "Harness: dfah"
-        if: always()
+        if: always() && steps['corpus-validate'].outcome == 'success'
         continue-on-error: true
         id: dfah
         run: make eval-dfah
@@ -97,7 +98,7 @@ jobs:
           if-no-files-found: warn
 
       - name: "Harness: mcp-eval"
-        if: always()
+        if: always() && steps['corpus-validate'].outcome == 'success'
         continue-on-error: true
         id: mcp-eval
         run: make eval-mcp-eval
@@ -111,7 +112,7 @@ jobs:
           if-no-files-found: warn
 
       - name: "Harness: deepeval"
-        if: always()
+        if: always() && steps['corpus-validate'].outcome == 'success'
         continue-on-error: true
         id: deepeval
         run: make eval-deepeval
