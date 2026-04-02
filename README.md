@@ -35,6 +35,31 @@ pip install -r eval/deepeval/requirements.txt
 
 ---
 
+## Corpus validation (recommended before running harnesses)
+
+`corpus-validate` checks that the test fixtures in `corpus/inputs/` still match
+the current Gemara CUE schemas. Run this whenever the gemara schema or the
+`gemara-mcp` image version changes. It catches schema drift early — before the
+harnesses produce confusing failures.
+
+Requires a local checkout of [gemaraproj/gemara](https://github.com/gemaraproj/gemara)
+and the [`cue` CLI](https://cuelang.org/docs/install/):
+
+```bash
+# Clone the schema at the same ref used to build the image you're testing
+git clone --depth 1 --branch v1.0.0-rc.2 https://github.com/gemaraproj/gemara /tmp/gemara
+
+export GEMARA_SCHEMA_PATH=/tmp/gemara
+make corpus-validate
+```
+
+If any fixture fails, the output tells you exactly which field no longer matches
+the schema. Fix the fixture before running the harnesses.
+
+In CI, `corpus-validate` runs automatically (see [CI](#ci) below).
+
+---
+
 ## Running
 
 ```bash
@@ -80,7 +105,25 @@ In CI, pass the image tag via the `workflow_dispatch` input `gemara_mcp_image`, 
 
 ## CI
 
-`.github/workflows/determinism-check.yml` runs on every push and PR to `main`. It exits 1 if the NFR6 score falls below the 90% threshold, blocking the merge.
+`.github/workflows/determinism-check.yml` runs on every push and PR to `main`.
+
+**Step order:**
+1. Install Python deps
+2. Install `cue` CLI
+3. Clone `gemaraproj/gemara` at `gemara_schema_ref` (default: `main`)
+4. **`corpus-validate`** — hard gate: if any valid fixture fails the schema, the job stops here with a clear schema-drift error before any harness runs
+5. Pull the `gemara-mcp` image
+6. Run the three harnesses (`dfah`, `mcp-eval`, `deepeval`)
+7. Generate and upload NFR6 report
+8. Exit 1 if NFR6 score < 90%
+
+When triggering via `workflow_dispatch`, pass both `gemara_mcp_image` and
+`gemara_schema_ref` to pin both the server and the schema to the same version:
+
+```
+gemara_mcp_image:  ghcr.io/your-org/gemara-mcp:sha-abc123
+gemara_schema_ref: v1.0.0-rc.2
+```
 
 ---
 
@@ -89,6 +132,7 @@ In CI, pass the image tag via the `workflow_dispatch` input `gemara_mcp_image`, 
 | Target | Description |
 |---|---|
 | `make` / `make all` | Run all harnesses + generate report |
+| `make corpus-validate` | Validate corpus fixtures against CUE schemas (requires `GEMARA_SCHEMA_PATH`) |
 | `make eval` | Run all three harnesses |
 | `make eval-dfah` | DFAH harness only |
 | `make eval-mcp-eval` | mcp-eval harness only |

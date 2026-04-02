@@ -130,6 +130,110 @@
     }
   },
   {
+    "id": "tc-006",
+    "name": "Validate malformed YAML (syntax error)",
+    "steps": [
+      {
+        "action": "call_tool",
+        "tool": "validate_gemara_artifact",
+        "arguments": {
+          "artifact_content": "metadata:\n  id: EVAL-MALFORMED\n  type: ControlCatalog\n  gemara-version: \"1.0\"\n  description: |\n    This file is intentionally malformed YAML to test error message determinism.\n  [invalid yaml: missing closing bracket\n  author:\n    id: eval-harness\n    name: Evaluation Harness\n    type: Software\ntitle: Malformed Control Catalog\ngroups:\n  - id: test\n",
+          "definition": "#ControlCatalog"
+        },
+        "assertions": [
+          {
+            "type": "json_path",
+            "path": "$.valid",
+            "expected": false
+          }
+        ]
+      }
+    ],
+    "determinism": {
+      "runs": 20,
+      "match_type": "exact",
+      "threshold": 1.0
+    }
+  },
+  {
+    "id": "tc-007",
+    "name": "Validate valid GuidanceCatalog",
+    "steps": [
+      {
+        "action": "call_tool",
+        "tool": "validate_gemara_artifact",
+        "arguments": {
+          "artifact_content": "metadata:\n  id: EVAL-GC\n  type: GuidanceCatalog\n  gemara-version: \"1.0\"\n  description: |\n    A minimal valid GuidanceCatalog for determinism evaluation.\n  author:\n    id: eval-harness\n    name: Evaluation Harness\n    type: Software\n  applicability-groups:\n    - id: standard\n      title: Standard\n      description: Applies to all standard deployments.\ntitle: Evaluation Guidance Catalog\ntype: \"Best Practice\"\ngroups:\n  - id: secure-defaults\n    title: Secure Defaults\n    description: Guidance on establishing secure default configurations.\nguidelines:\n  - id: EVAL-GC.G01\n    group: secure-defaults\n    title: Disable Unused Services\n    state: Active\n    text: |\n      All unused services and ports SHOULD be disabled by default to reduce\n      the attack surface of the deployment.\n    applicability:\n      - standard\n",
+          "definition": "#GuidanceCatalog"
+        },
+        "assertions": [
+          {
+            "type": "json_path",
+            "path": "$.valid",
+            "expected": true
+          }
+        ]
+      }
+    ],
+    "determinism": {
+      "runs": 20,
+      "match_type": "exact",
+      "threshold": 1.0
+    }
+  },
+  {
+    "id": "tc-008",
+    "name": "Validate artifact with unknown definition type",
+    "steps": [
+      {
+        "action": "call_tool",
+        "tool": "validate_gemara_artifact",
+        "arguments": {
+          "artifact_content": "metadata:\n  id: EVAL-UNK\n  type: ControlCatalog\n  gemara-version: \"1.0\"\n  description: |\n    A valid YAML artifact submitted with an unknown definition parameter\n    to test determinism of the error response path.\n  author:\n    id: eval-harness\n    name: Evaluation Harness\n    type: Software\n  applicability-groups:\n    - id: standard\n      title: Standard\n      description: Applies to all standard deployments.\ntitle: Unknown Definition Test Artifact\ngroups:\n  - id: test-group\n    title: Test Group\n    description: A test group.\ncontrols:\n  - id: EVAL-UNK.C01\n    group: test-group\n    title: Test Control\n    state: Active\n    objective: A test control objective.\n    assessment-requirements:\n      - id: EVAL-UNK.C01.TR01\n        state: Active\n        text: Test requirement.\n        applicability:\n          - standard\n",
+          "definition": "#UnknownType"
+        },
+        "assertions": [
+          {
+            "type": "json_path",
+            "path": "$.valid",
+            "expected": false
+          }
+        ]
+      }
+    ],
+    "determinism": {
+      "runs": 20,
+      "match_type": "exact",
+      "threshold": 1.0
+    }
+  },
+  {
+    "id": "tc-009",
+    "name": "Validate valid Policy artifact",
+    "steps": [
+      {
+        "action": "call_tool",
+        "tool": "validate_gemara_artifact",
+        "arguments": {
+          "artifact_content": "metadata:\n  id: EVAL-POL\n  type: Policy\n  gemara-version: \"1.0\"\n  description: |\n    A minimal valid Policy artifact for determinism evaluation.\n  author:\n    id: eval-harness\n    name: Evaluation Harness\n    type: Software\ntitle: Evaluation Security Policy\ncontacts:\n  responsible:\n    - id: security-team\n      name: Security Team\n      type: Team\n  accountable:\n    - id: ciso\n      name: CISO\n      type: Person\n  consulted: []\n  informed: []\nscope:\n  in:\n    technologies:\n      - \"Cloud Infrastructure\"\n    sensitivity:\n      - \"Confidential\"\n      - \"Restricted\"\nimports:\n  policies: []\n  controls: []\n  guidelines: []\nadherence:\n  exceptions-process: |\n    Exceptions must be submitted to the security team with a written\n    justification and approved by the CISO.\n  enforcement: |\n    Violations will be reviewed by the security committee and may result\n    in remediation requirements or disciplinary action.\n",
+          "definition": "#Policy"
+        },
+        "assertions": [
+          {
+            "type": "json_path",
+            "path": "$.valid",
+            "expected": true
+          }
+        ]
+      }
+    ],
+    "determinism": {
+      "runs": 20,
+      "match_type": "exact",
+      "threshold": 1.0
+    }
+  },
+  {
     "id": "tc-010",
     "name": "Threat assessment for Kubernetes multi-tenant PII system",
     "steps": [

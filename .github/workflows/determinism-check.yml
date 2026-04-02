@@ -4,10 +4,13 @@ name: "NFR6 — Output Determinism"
 # Exits 1 if the 90% determinism threshold is not met.
 # No LLM, no Ollama, no Node.js required.
 #
-# The gemara-mcp image is provided externally:
-#   - workflow_dispatch: pass via the gemara_mcp_image input
-#   - push/PR: uses the default image tag below
-#   The upstream pipeline builds and pushes the image, then triggers this workflow.
+# External inputs:
+#   gemara_mcp_image   — the gemara-mcp Docker image to evaluate
+#   gemara_schema_ref  — git ref (tag/branch/SHA) of gemaraproj/gemara to use
+#                        for corpus validation (default: main)
+#
+# The upstream pipeline builds and pushes the image then triggers this workflow,
+# passing the image tag and the schema ref that matches the build.
 
 on:
   push:
@@ -20,6 +23,10 @@ on:
         description: "gemara-mcp Docker image to evaluate (e.g. ghcr.io/org/gemara-mcp:sha-abc123)"
         required: false
         default: "ghcr.io/gemaraproj/gemara-mcp:v0.1.0"
+      gemara_schema_ref:
+        description: "gemaraproj/gemara git ref for corpus validation (tag, branch, or SHA)"
+        required: false
+        default: "main"
 
 jobs:
   output-determinism:
@@ -29,6 +36,8 @@ jobs:
 
     env:
       GEMARA_MCP_IMAGE: ${{ github.event.inputs.gemara_mcp_image || 'ghcr.io/gemaraproj/gemara-mcp:v0.1.0' }}
+      GEMARA_SCHEMA_REF: ${{ github.event.inputs.gemara_schema_ref || 'main' }}
+      GEMARA_SCHEMA_PATH: /tmp/gemara
       CONTAINER_RUNTIME: docker
 
     steps:
@@ -46,11 +55,32 @@ jobs:
           pip install -r eval/mcp-eval/requirements.txt
           pip install -r eval/deepeval/requirements.txt
 
-      - name: Pull gemara-mcp image
-        run: docker pull ${{ env.GEMARA_MCP_IMAGE }}
+      # --- Corpus validation gate ---
+      # Validates tc-*-valid-*.yaml fixtures against the gemara CUE schemas.
+      # Catches schema drift before the harnesses run, so failures are diagnosed
+      # as stale corpus rather than unexplained harness failures.
+
+      - name: Install CUE
+        run: |
+          curl -sSL https://github.com/cue-lang/cue/releases/download/v0.11.1/cue_v0.11.1_linux_amd64.tar.gz \
+            | sudo tar xz -C /usr/local/bin cue
+          cue version
+
+      - name: Checkout gemara schema (${{ env.GEMARA_SCHEMA_REF }})
+        run: |
+          git clone --depth 1 --branch ${{ env.GEMARA_SCHEMA_REF }} \
+            https://github.com/gemaraproj/gemara ${{ env.GEMARA_SCHEMA_PATH }}
+          echo "Schema at: $(git -C ${{ env.GEMARA_SCHEMA_PATH }} log -1 --oneline)"
+
+      - name: Validate corpus against schema
+        id: corpus-validate
+        run: make corpus-validate
 
       # --- Per-harness steps — all always run and upload independently
       #     so a partial failure still produces usable results.
+
+      - name: Pull gemara-mcp image
+        run: docker pull ${{ env.GEMARA_MCP_IMAGE }}
 
       - name: "Harness: dfah"
         if: always()
@@ -97,11 +127,12 @@ jobs:
       - name: Print harness summary
         if: always()
         run: |
-          echo "| Harness   | Outcome |"
-          echo "|-----------|---------|"
-          echo "| dfah      | ${{ steps.dfah.outcome }} |"
-          echo "| mcp-eval  | ${{ steps['mcp-eval'].outcome }} |"
-          echo "| deepeval  | ${{ steps.deepeval.outcome }} |"
+          echo "| Harness        | Outcome |"
+          echo "|----------------|---------|"
+          echo "| corpus-validate| ${{ steps['corpus-validate'].outcome }} |"
+          echo "| dfah           | ${{ steps.dfah.outcome }} |"
+          echo "| mcp-eval       | ${{ steps['mcp-eval'].outcome }} |"
+          echo "| deepeval       | ${{ steps.deepeval.outcome }} |"
 
       - name: Generate NFR6 report
         if: always()

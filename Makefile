@@ -1,4 +1,4 @@
-.PHONY: all eval eval-dfah eval-mcp-eval eval-deepeval report compare clean
+.PHONY: all corpus-validate eval eval-dfah eval-mcp-eval eval-deepeval report compare clean
 
 -include .env
 export
@@ -10,6 +10,16 @@ RESULTS_DIR := results
 CONTAINER_RUNTIME ?= docker
 
 all: eval report
+
+# --- Corpus ---
+
+# Validate corpus/inputs/tc-*-valid-*.yaml against the Gemara CUE schemas.
+# Requires GEMARA_SCHEMA_PATH to point to a gemara schema checkout.
+# Gracefully skips (warning only) when GEMARA_SCHEMA_PATH is unset.
+corpus-validate:
+	@echo "==> Validating corpus inputs against Gemara CUE schemas..."
+	python3 scripts/corpus_validate.py
+	@echo "==> Corpus validation complete."
 
 # --- Individual Evaluations ---
 
