@@ -1,0 +1,153 @@
+[
+  {
+    "id": "cs-001",
+    "description": "Multi-tenant Kubernetes PII platform",
+    "input": "Create a control catalog for a multi-tenant Kubernetes platform that processes PII for healthcare customers.",
+    "component": "Kubernetes Workload Protection",
+    "id_prefix": "K8S-WP",
+    "definition": "#ControlCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "controls": ["encryption in transit", "tenant isolation", "data access control", "audit logging", "data encryption at rest"],
+      "families": ["data-protection", "access-control", "network-security"]
+    },
+    "evidence": {
+      "component": {"title": "Kubernetes Workload Protection"},
+      "artifact_type": {"title": "ControlCatalog"},
+      "id_prefix": {"id": "K8S-WP"},
+      "author": {"id": "eval-harness"},
+      "families": [
+        {"title": "data-protection"},
+        {"title": "access-control"},
+        {"title": "network-security"}
+      ],
+      "expected_control_titles": [
+        {"title": "Enforce Encryption in Transit"},
+        {"title": "Enforce Network Policy Isolation"},
+        {"title": "Enforce Pod Security Standards"},
+        {"title": "Restrict Privileged Containers"},
+        {"title": "Enforce RBAC Least Privilege"}
+      ]
+    }
+  },
+  {
+    "id": "cs-002",
+    "description": "Public-facing API gateway",
+    "input": "Create a control catalog for a public-facing API gateway handling financial transactions.",
+    "component": "Cloud IAM Service",
+    "id_prefix": "IAM",
+    "definition": "#ControlCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "controls": ["multi-factor authentication", "least privilege access", "credential rotation", "stale account prevention", "anomaly monitoring"],
+      "families": ["access-control", "authentication"]
+    },
+    "evidence": {
+      "component": {"title": "Cloud IAM Service"},
+      "artifact_type": {"title": "ControlCatalog"},
+      "id_prefix": {"id": "IAM"},
+      "author": {"id": "eval-harness"},
+      "families": [
+        {"title": "access-control"},
+        {"title": "authentication"}
+      ],
+      "expected_control_titles": [
+        {"title": "Enforce Multi-Factor Authentication"},
+        {"title": "Enforce Least Privilege Access"},
+        {"title": "Enforce Credential Rotation"},
+        {"title": "Prevent Stale Account Access"},
+        {"title": "Monitor Authentication Anomalies"}
+      ]
+    }
+  },
+  {
+    "id": "cs-003",
+    "description": "Cloud object storage",
+    "input": "Create a control catalog for a cloud object storage service with cross-region replication.",
+    "component": "Cloud Object Storage Service",
+    "id_prefix": "OBJ-STORE",
+    "definition": "#ControlCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "controls": ["encryption at rest", "access policy", "data replication control", "region restriction", "log protection"],
+      "families": ["data-protection", "compliance"]
+    },
+    "evidence": {
+      "component": {"title": "Cloud Object Storage Service"},
+      "artifact_type": {"title": "ControlCatalog"},
+      "id_prefix": {"id": "OBJ-STORE"},
+      "author": {"id": "eval-harness"},
+      "families": [
+        {"title": "data-protection"},
+        {"title": "compliance"}
+      ],
+      "expected_control_titles": [
+        {"title": "Enforce Encryption at Rest"},
+        {"title": "Enforce Access Policy"},
+        {"title": "Restrict Data Replication"},
+        {"title": "Enforce Region Restrictions"},
+        {"title": "Protect Log Integrity"}
+      ]
+    }
+  },
+  {
+    "id": "cs-004",
+    "description": "Secrets management vault",
+    "input": "Create a control catalog for a centralized secrets management vault used across production services.",
+    "component": "Data Encryption Key Management Service",
+    "id_prefix": "ENC-KMS",
+    "definition": "#ControlCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "controls": ["encryption at rest", "key rotation", "key access restriction", "key separation", "key usage audit"],
+      "families": ["data-protection", "key-management"]
+    },
+    "evidence": {
+      "component": {"title": "Data Encryption Key Management Service"},
+      "artifact_type": {"title": "ControlCatalog"},
+      "id_prefix": {"id": "ENC-KMS"},
+      "author": {"id": "eval-harness"},
+      "families": [
+        {"title": "data-protection"},
+        {"title": "key-management"}
+      ],
+      "expected_control_titles": [
+        {"title": "Enforce Encryption at Rest"},
+        {"title": "Enforce Key Rotation"},
+        {"title": "Restrict Key Access"},
+        {"title": "Enforce Key Separation"},
+        {"title": "Audit Key Usage"}
+      ]
+    }
+  },
+  {
+    "id": "cs-005",
+    "description": "CI/CD pipeline",
+    "input": "Create a control catalog for a CI/CD pipeline that builds, signs, and distributes container images.",
+    "component": "Container Image Build and Distribution Pipeline",
+    "id_prefix": "IMG-SC",
+    "definition": "#ControlCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "controls": ["image signing", "vulnerability scanning", "base image provenance", "registry access control", "SBOM generation"],
+      "families": ["supply-chain", "image-integrity"]
+    },
+    "evidence": {
+      "component": {"title": "Container Image Build and Distribution Pipeline"},
+      "artifact_type": {"title": "ControlCatalog"},
+      "id_prefix": {"id": "IMG-SC"},
+      "author": {"id": "eval-harness"},
+      "families": [
+        {"title": "supply-chain"},
+        {"title": "image-integrity"}
+      ],
+      "expected_control_titles": [
+        {"title": "Enforce Image Signing"},
+        {"title": "Enforce Vulnerability Scanning"},
+        {"title": "Verify Base Image Provenance"},
+        {"title": "Restrict Registry Sources"},
+        {"title": "Enforce SBOM Generation"}
+      ]
+    }
+  }
+]

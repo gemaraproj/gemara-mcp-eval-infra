@@ -1,0 +1,5 @@
+{
+  "valid": false,
+  "errors_must_contain": ["UnknownType", "definition", "not found"],
+  "message_pattern": "validation failed"
+}

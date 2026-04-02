@@ -1,0 +1,32 @@
+metadata:
+  id: EVAL-UNK
+  type: ControlCatalog
+  gemara-version: "1.0"
+  description: |
+    A valid YAML artifact submitted with an unknown definition parameter
+    to test determinism of the error response path.
+  author:
+    id: eval-harness
+    name: Evaluation Harness
+    type: Software
+  applicability-groups:
+    - id: standard
+      title: Standard
+      description: Applies to all standard deployments.
+title: Unknown Definition Test Artifact
+groups:
+  - id: test-group
+    title: Test Group
+    description: A test group.
+controls:
+  - id: EVAL-UNK.C01
+    group: test-group
+    title: Test Control
+    state: Active
+    objective: A test control objective.
+    assessment-requirements:
+      - id: EVAL-UNK.C01.TR01
+        state: Active
+        text: Test requirement.
+        applicability:
+          - standard

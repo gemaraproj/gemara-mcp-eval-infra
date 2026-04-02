@@ -1,0 +1,162 @@
+[
+  {
+    "id": "tm-001",
+    "description": "K8s multi-tenant PII threats",
+    "input": "Create a threat catalog for a multi-tenant Kubernetes platform processing PII.",
+    "component": "Multi-tenant Kubernetes PII Processing Platform",
+    "id_prefix": "K8S-PII",
+    "definition": "#ThreatCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "threats": ["data exfiltration", "tenant isolation breach", "container escape", "unauthorized access", "lateral movement"],
+      "capabilities": ["multi-tenant isolation", "data encryption", "access control", "network segmentation"]
+    },
+    "evidence": {
+      "component": {"title": "Multi-tenant Kubernetes PII Processing Platform"},
+      "artifact_type": {"title": "ThreatCatalog"},
+      "id_prefix": {"id": "K8S-PII"},
+      "author": {"id": "eval-harness"},
+      "capabilities": [
+        {"title": "multi-tenant isolation"},
+        {"title": "data encryption"},
+        {"title": "access control"},
+        {"title": "network segmentation"}
+      ],
+      "expected_threat_titles": [
+        {"title": "Data Exfiltration from Tenant Namespace"},
+        {"title": "Tenant Isolation Breach"},
+        {"title": "Container Escape"},
+        {"title": "Unauthorized Access to PII"},
+        {"title": "Lateral Movement Between Tenants"}
+      ]
+    }
+  },
+  {
+    "id": "tm-002",
+    "description": "CI/CD supply chain threats",
+    "input": "Create a threat catalog for a CI/CD pipeline pulling base images from public registries without signing.",
+    "component": "CICD Pipeline with Container Registry",
+    "id_prefix": "CICD",
+    "definition": "#ThreatCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "threats": ["supply chain compromise", "image tampering", "malicious dependency", "credential leakage", "pipeline hijack"],
+      "capabilities": ["image building", "dependency resolution", "artifact distribution"]
+    },
+    "evidence": {
+      "component": {"title": "CICD Pipeline with Container Registry"},
+      "artifact_type": {"title": "ThreatCatalog"},
+      "id_prefix": {"id": "CICD"},
+      "author": {"id": "eval-harness"},
+      "capabilities": [
+        {"title": "image building"},
+        {"title": "dependency resolution"},
+        {"title": "artifact distribution"},
+        {"title": "pipeline orchestration"}
+      ],
+      "expected_threat_titles": [
+        {"title": "Supply Chain Compromise via Malicious Base Image"},
+        {"title": "Container Image Tampering"},
+        {"title": "Malicious Dependency Injection"},
+        {"title": "Unauthorized Pipeline Execution"},
+        {"title": "Credential Leakage in Build Artifacts"}
+      ]
+    }
+  },
+  {
+    "id": "tm-003",
+    "description": "Object storage threats",
+    "input": "Create a threat catalog for a cloud object storage service with cross-region replication.",
+    "component": "Cloud Object Storage Service",
+    "id_prefix": "OBJ-STORE",
+    "definition": "#ThreatCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "threats": ["data loss", "unauthorized access", "data replication to untrusted location", "bucket misconfiguration", "data exfiltration"],
+      "capabilities": ["object storage", "access policy management", "data replication"]
+    },
+    "evidence": {
+      "component": {"title": "Cloud Object Storage Service"},
+      "artifact_type": {"title": "ThreatCatalog"},
+      "id_prefix": {"id": "OBJ-STORE"},
+      "author": {"id": "eval-harness"},
+      "capabilities": [
+        {"title": "object storage"},
+        {"title": "access policy management"},
+        {"title": "data replication"},
+        {"title": "encryption at rest"}
+      ],
+      "expected_threat_titles": [
+        {"title": "Data Loss or Corruption"},
+        {"title": "Unauthorized Access to Stored Objects"},
+        {"title": "Data Replication to Untrusted Location"},
+        {"title": "Misconfigured Access Policies"},
+        {"title": "Data Exfiltration via Public Bucket"}
+      ]
+    }
+  },
+  {
+    "id": "tm-004",
+    "description": "API gateway threats",
+    "input": "Create a threat catalog for a public-facing API gateway.",
+    "component": "Public-facing API Gateway",
+    "id_prefix": "APIGW",
+    "definition": "#ThreatCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "threats": ["denial of service", "injection attack", "authentication bypass", "API key compromise", "data interception"],
+      "capabilities": ["request routing", "authentication", "rate limiting", "input validation"]
+    },
+    "evidence": {
+      "component": {"title": "Public-facing API Gateway"},
+      "artifact_type": {"title": "ThreatCatalog"},
+      "id_prefix": {"id": "APIGW"},
+      "author": {"id": "eval-harness"},
+      "capabilities": [
+        {"title": "request routing"},
+        {"title": "authentication"},
+        {"title": "rate limiting"},
+        {"title": "input validation"}
+      ],
+      "expected_threat_titles": [
+        {"title": "Denial of Service"},
+        {"title": "Injection Attack"},
+        {"title": "Authentication Bypass"},
+        {"title": "Rate Limiting Evasion"},
+        {"title": "API Key Compromise"}
+      ]
+    }
+  },
+  {
+    "id": "tm-005",
+    "description": "Secrets vault threats",
+    "input": "Create a threat catalog for a centralized secrets management vault.",
+    "component": "Centralized Secrets Management Vault",
+    "id_prefix": "VAULT",
+    "definition": "#ThreatCatalog",
+    "match_type": "jaccard",
+    "expected_output": {
+      "threats": ["credential theft", "unauthorized secret access", "key compromise", "privilege escalation", "audit log tampering"],
+      "capabilities": ["secret storage", "access control", "audit logging", "key rotation"]
+    },
+    "evidence": {
+      "component": {"title": "Centralized Secrets Management Vault"},
+      "artifact_type": {"title": "ThreatCatalog"},
+      "id_prefix": {"id": "VAULT"},
+      "author": {"id": "eval-harness"},
+      "capabilities": [
+        {"title": "secret storage"},
+        {"title": "access control"},
+        {"title": "audit logging"},
+        {"title": "key rotation"}
+      ],
+      "expected_threat_titles": [
+        {"title": "Credential Theft from Vault"},
+        {"title": "Unauthorized Secret Access"},
+        {"title": "Key Compromise or Leakage"},
+        {"title": "Privilege Escalation via Secret Access"},
+        {"title": "Audit Log Tampering"}
+      ]
+    }
+  }
+]

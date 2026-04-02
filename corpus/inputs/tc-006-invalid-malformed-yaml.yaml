@@ -1,0 +1,14 @@
+metadata:
+  id: EVAL-MALFORMED
+  type: ControlCatalog
+  gemara-version: "1.0"
+  description: |
+    This file is intentionally malformed YAML to test error message determinism.
+  [invalid yaml: missing closing bracket
+  author:
+    id: eval-harness
+    name: Evaluation Harness
+    type: Software
+title: Malformed Control Catalog
+groups:
+  - id: test

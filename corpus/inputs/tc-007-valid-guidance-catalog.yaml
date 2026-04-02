@@ -1,0 +1,30 @@
+metadata:
+  id: EVAL-GC
+  type: GuidanceCatalog
+  gemara-version: "1.0"
+  description: |
+    A minimal valid GuidanceCatalog for determinism evaluation.
+  author:
+    id: eval-harness
+    name: Evaluation Harness
+    type: Software
+  applicability-groups:
+    - id: standard
+      title: Standard
+      description: Applies to all standard deployments.
+title: Evaluation Guidance Catalog
+type: "Best Practice"
+groups:
+  - id: secure-defaults
+    title: Secure Defaults
+    description: Guidance on establishing secure default configurations.
+guidelines:
+  - id: EVAL-GC.G01
+    group: secure-defaults
+    title: Disable Unused Services
+    state: Active
+    text: |
+      All unused services and ports SHOULD be disabled by default to reduce
+      the attack surface of the deployment.
+    applicability:
+      - standard

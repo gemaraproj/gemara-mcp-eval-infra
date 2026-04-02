@@ -1,0 +1,5 @@
+{
+  "valid": false,
+  "errors_must_contain": ["yaml", "parse", "invalid"],
+  "message_pattern": "validation failed"
+}

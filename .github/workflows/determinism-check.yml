@@ -1,0 +1,131 @@
+name: "NFR6 — Output Determinism (Phase 1)"
+
+# NFR6 compliance gate for phase 1 (output determinism, no LLM).
+# Runs on every push and PR to main. Exits 1 if the 90% determinism threshold is not met.
+# No submodules, no LLM, no Ollama, no Node.js required.
+#
+# The gemara-mcp image is provided externally:
+#   - In CI: set GEMARA_MCP_IMAGE via the workflow_dispatch input or as a repository secret/var.
+#   - The upstream pipeline builds and pushes the image, then triggers or re-uses this workflow.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      gemara_mcp_image:
+        description: "gemara-mcp Docker image to evaluate (e.g. ghcr.io/org/gemara-mcp:sha-abc123)"
+        required: false
+        default: "ghcr.io/gemaraproj/gemara-mcp:v0.1.0"
+
+jobs:
+  output-determinism:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    env:
+      GEMARA_MCP_IMAGE: ${{ github.event.inputs.gemara_mcp_image || 'ghcr.io/gemaraproj/gemara-mcp:v0.1.0' }}
+      CONTAINER_RUNTIME: docker
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          pip install -r eval/dfah/requirements.txt
+          pip install -r eval/mcp-eval/requirements.txt
+          pip install -r eval/deepeval/requirements.txt
+
+      - name: Pull gemara-mcp image
+        run: docker pull ${{ env.GEMARA_MCP_IMAGE }}
+
+      # --- Per-harness steps — both always run and upload independently
+      #     so a partial failure still produces usable results.
+
+      - name: "Harness: dfah"
+        if: always()
+        continue-on-error: true
+        id: dfah
+        run: make eval-dfah
+
+      - name: Upload dfah results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-dfah
+          path: results/dfah.json
+          if-no-files-found: warn
+
+      - name: "Harness: mcp-eval"
+        if: always()
+        continue-on-error: true
+        id: mcp-eval
+        run: make eval-mcp-eval
+
+      - name: Upload mcp-eval results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-mcp-eval
+          path: results/mcp-eval.json
+          if-no-files-found: warn
+
+      - name: "Harness: deepeval-phase1"
+        if: always()
+        continue-on-error: true
+        id: deepeval-phase1
+        run: make eval-deepeval-phase1
+
+      - name: Upload deepeval-phase1 results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-deepeval-phase1
+          path: results/deepeval-phase1.json
+          if-no-files-found: warn
+
+      - name: Print Phase 1 harness summary
+        if: always()
+        run: |
+          echo "| Harness          | Outcome |"
+          echo "|------------------|---------|"
+          echo "| dfah             | ${{ steps.dfah.outcome }} |"
+          echo "| mcp-eval         | ${{ steps['mcp-eval'].outcome }} |"
+          echo "| deepeval-phase1  | ${{ steps['deepeval-phase1'].outcome }} |"
+
+      - name: Generate Phase 1 NFR6 report
+        if: always()
+        run: make report-phase1
+
+      - name: Upload Phase 1 NFR6 report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase1-report
+          path: results/nfr6-phase1-report.json
+          if-no-files-found: warn
+
+      - name: Check NFR6 threshold
+        run: |
+          python -c "
+          import json, sys
+          with open('results/nfr6-phase1-report.json') as f:
+              report = json.load(f)
+          verdict = report['nfr6_report']['nfr6_verdict']
+          score = report['nfr6_report']['overall_determinism_score']
+          print(f'NFR6 Phase 1: {verdict} (score: {score:.1%})')
+          for a in report['per_tool_assessments']:
+              s = a['determinism_score']
+              s_str = f\"{s:.1%}\" if s is not None else 'N/A'
+              print(f\"  {a['tool']}: {s_str} ({a['nfr6_contribution'].upper()})\")
+          sys.exit(0 if verdict == 'PASS' else 1)
+          "

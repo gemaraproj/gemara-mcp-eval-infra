@@ -1,0 +1,94 @@
+[
+  {
+    "id": "av-001",
+    "description": "Valid ControlCatalog validation",
+    "input": "Validate a well-formed ControlCatalog YAML artifact",
+    "artifact_file": "../../../corpus/inputs/tc-001-valid-control-catalog.yaml",
+    "definition": "#ControlCatalog",
+    "match_type": "exact",
+    "expected_output": {
+      "valid": true,
+      "errors": [],
+      "message": "Validation successful"
+    },
+    "evidence": {
+      "artifact": {
+        "id": "EVAL-CC",
+        "title": "Evaluation Control Catalog"
+      },
+      "schema": {"title": "ControlCatalog"},
+      "expected_result": {"text": "valid"},
+      "controls": [
+        {"id": "EVAL-CC.C01", "title": "Enforce Encryption in Transit"}
+      ]
+    }
+  },
+  {
+    "id": "av-002",
+    "description": "Invalid ControlCatalog missing group",
+    "input": "Validate a ControlCatalog with a control referencing a non-existent group",
+    "artifact_file": "../../../corpus/inputs/tc-002-invalid-missing-group.yaml",
+    "definition": "#ControlCatalog",
+    "match_type": "exact",
+    "expected_output": {
+      "valid": false,
+      "error_contains": "group"
+    },
+    "evidence": {
+      "schema": {"title": "ControlCatalog"},
+      "expected_result": {"text": "invalid"},
+      "expected_error": {"text": "group nonexistent-group"}
+    }
+  },
+  {
+    "id": "av-003",
+    "description": "Valid ThreatCatalog validation",
+    "input": "Validate a well-formed ThreatCatalog YAML artifact",
+    "artifact_file": "../../../corpus/inputs/tc-003-valid-threat-catalog.yaml",
+    "definition": "#ThreatCatalog",
+    "match_type": "exact",
+    "expected_output": {
+      "valid": true,
+      "errors": [],
+      "message": "Validation successful"
+    },
+    "evidence": {
+      "schema": {"title": "ThreatCatalog"},
+      "expected_result": {"text": "valid"}
+    }
+  },
+  {
+    "id": "av-004",
+    "description": "Type mismatch validation",
+    "input": "Validate a ControlCatalog artifact against ThreatCatalog schema",
+    "artifact_file": "../../../corpus/inputs/tc-004-invalid-wrong-type.yaml",
+    "definition": "#ThreatCatalog",
+    "match_type": "exact",
+    "expected_output": {
+      "valid": false,
+      "error_contains": "type"
+    },
+    "evidence": {
+      "schema": {"title": "ThreatCatalog"},
+      "expected_result": {"text": "invalid"},
+      "expected_error": {"text": "type metadata"}
+    }
+  },
+  {
+    "id": "av-005",
+    "description": "Empty artifact validation",
+    "input": "Validate an empty YAML artifact",
+    "artifact_file": "../../../corpus/inputs/tc-005-empty.yaml",
+    "definition": "#ControlCatalog",
+    "match_type": "exact",
+    "expected_output": {
+      "valid": false,
+      "error_contains": "required"
+    },
+    "evidence": {
+      "schema": {"title": "ControlCatalog"},
+      "expected_result": {"text": "invalid"},
+      "expected_error": {"text": "required field missing"}
+    }
+  }
+]

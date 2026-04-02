@@ -1,0 +1,40 @@
+metadata:
+  id: EVAL-POL
+  type: Policy
+  gemara-version: "1.0"
+  description: |
+    A minimal valid Policy artifact for determinism evaluation.
+  author:
+    id: eval-harness
+    name: Evaluation Harness
+    type: Software
+title: Evaluation Security Policy
+contacts:
+  responsible:
+    - id: security-team
+      name: Security Team
+      type: Team
+  accountable:
+    - id: ciso
+      name: CISO
+      type: Person
+  consulted: []
+  informed: []
+scope:
+  in:
+    technologies:
+      - "Cloud Infrastructure"
+    sensitivity:
+      - "Confidential"
+      - "Restricted"
+imports:
+  policies: []
+  controls: []
+  guidelines: []
+adherence:
+  exceptions-process: |
+    Exceptions must be submitted to the security team with a written
+    justification and approved by the CISO.
+  enforcement: |
+    Violations will be reviewed by the security committee and may result
+    in remediation requirements or disciplinary action.
