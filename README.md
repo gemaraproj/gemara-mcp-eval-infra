@@ -1,10 +1,10 @@
-# gemara-mcp-eval-phase1
+# gemara-mcp-eval
 
-NFR6 Phase 1 evaluation harness — **output determinism, no LLM required**.
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
+NFR6 evaluation harness — **output determinism, no LLM required**.
 
 This repo measures whether `gemara-mcp` produces identical structured artifacts across repeated runs (NFR6: ≥ 90% determinism). It is a standalone extraction of the Phase 1 POC work from the full `gemara-mcp-eval` suite.
-
-Phase 2 (LLM integration quality) is not included here. See `PHASE1-OUTPUT-DETERMINISM.md` for full technical details.
 
 ---
 
@@ -28,10 +28,24 @@ cp .env.example .env
 Install Python dependencies:
 
 ```bash
+pip install -r scripts/requirements.txt
 pip install -r eval/dfah/requirements.txt
 pip install -r eval/mcp-eval/requirements.txt
 pip install -r eval/deepeval/requirements.txt
 ```
+
+---
+
+## Environment variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `GEMARA_MCP_IMAGE` | `ghcr.io/gemaraproj/gemara-mcp:0.1.0` | Container image to evaluate |
+| `GEMARA_MCP_MODE` | `artifact` | Server mode passed to the container |
+| `CONTAINER_RUNTIME` | `docker` | `docker` or `podman` |
+| `GEMARA_SCHEMA_PATH` | _(unset)_ | Path to a local `gemaraproj/gemara` checkout for `corpus-validate` |
+
+All four are read from `.env` automatically by the Makefile (`-include .env`).
 
 ---
 
@@ -63,7 +77,7 @@ In CI, `corpus-validate` runs automatically (see [CI](#ci) below).
 ## Running
 
 ```bash
-# Run all three harnesses and generate the NFR6 report
+# Run corpus-validate, all three harnesses, and generate the NFR6 report
 make
 
 # Or run individually
@@ -75,7 +89,18 @@ make eval-deepeval
 make report
 ```
 
-Results land in `results/`. The NFR6 report is at `results/nfr6-phase1-report.json`.
+Results land in `results/`. The NFR6 report is at `results/nfr6-report.json`.
+
+---
+
+## Results
+
+| File | Contents |
+|---|---|
+| `results/dfah.json` | DFAH trajectory determinism per benchmark and case |
+| `results/mcp-eval.json` | Per-scenario results with `match_rate` per run |
+| `results/deepeval.json` | pytest-json-report output |
+| `results/nfr6-report.json` | Aggregated NFR6 verdict, overall score, and per-tool breakdown |
 
 ---
 
@@ -86,6 +111,18 @@ Results land in `results/`. The NFR6 report is at `results/nfr6-phase1-report.js
 | `eval/dfah` | DFAH trajectory determinism — repeated tool-call sequences produce identical output |
 | `eval/mcp-eval` | Scenario-based MCP response determinism against `corpus/` fixtures |
 | `eval/deepeval` | DeepEval pytest assertions on output structure and field stability |
+
+---
+
+## Local service (optional)
+
+`docker-compose.yml` defines a local `gemara-mcp` service for development convenience:
+
+```bash
+docker compose up
+```
+
+The harnesses do not require `docker compose` — each harness spawns the container directly via MCP stdio transport. The compose file is provided as an optional alternative for running the server independently.
 
 ---
 
@@ -109,11 +146,11 @@ In CI, pass the image tag via the `workflow_dispatch` input `gemara_mcp_image`, 
 
 **Step order:**
 1. Install Python deps
-2. Install `cue` CLI
-3. Clone `gemaraproj/gemara` at `gemara_schema_ref` (default: `main`)
+2. Clone `gemaraproj/gemara` at `gemara_schema_ref` (default: `main`)
+3. Install `cue` CLI
 4. **`corpus-validate`** — hard gate: if any valid fixture fails the schema, the job stops here with a clear schema-drift error before any harness runs
 5. Pull the `gemara-mcp` image
-6. Run the three harnesses (`dfah`, `mcp-eval`, `deepeval`)
+6. Run the three harnesses (`dfah`, `mcp-eval`, `deepeval`) — each runs independently with `continue-on-error: true` so a partial failure still uploads available results
 7. Generate and upload NFR6 report
 8. Exit 1 if NFR6 score < 90%
 
@@ -131,7 +168,7 @@ gemara_schema_ref: v1.0.0-rc.2
 
 | Target | Description |
 |---|---|
-| `make` / `make all` | Run all harnesses + generate report |
+| `make` / `make all` | Run corpus-validate, all harnesses, and generate report |
 | `make corpus-validate` | Validate corpus fixtures against CUE schemas (requires `GEMARA_SCHEMA_PATH`) |
 | `make eval` | Run all three harnesses |
 | `make eval-dfah` | DFAH harness only |
