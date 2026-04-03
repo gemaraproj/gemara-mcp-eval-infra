@@ -11,15 +11,9 @@ metadata:
 title: Evaluation Security Policy
 contacts:
   responsible:
-    - id: security-team
-      name: Security Team
-      type: Team
+    - name: Security Team
   accountable:
-    - id: ciso
-      name: CISO
-      type: Person
-  consulted: []
-  informed: []
+    - name: CISO
 scope:
   in:
     technologies:
@@ -27,14 +21,8 @@ scope:
     sensitivity:
       - "Confidential"
       - "Restricted"
-imports:
-  policies: []
-  controls: []
-  guidelines: []
+imports: {}
 adherence:
-  exceptions-process: |
-    Exceptions must be submitted to the security team with a written
-    justification and approved by the CISO.
-  enforcement: |
+  non-compliance: |
     Violations will be reviewed by the security committee and may result
     in remediation requirements or disciplinary action.
