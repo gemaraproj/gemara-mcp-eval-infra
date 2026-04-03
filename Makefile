@@ -42,6 +42,7 @@ eval-deepeval: $(RESULTS_DIR)
 	cd $(EVAL_DIR)/deepeval && python3 -m pytest \
 		test_output_determinism.py \
 		--tb=short -q \
+		--timeout=120 \
 		--json-report --json-report-file=../../$(RESULTS_DIR)/deepeval.json
 	@echo "==> DeepEval complete."
 

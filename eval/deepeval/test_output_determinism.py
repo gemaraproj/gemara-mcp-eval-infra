@@ -9,7 +9,6 @@ Runs as part of the NFR6 CI gate via `make eval-deepeval`.
 Results are written via pytest-json-report to results/deepeval.json.
 """
 
-import asyncio
 import sys
 from pathlib import Path
 
@@ -27,9 +26,9 @@ def _det_config(scenario: dict) -> dict:
     return det.get("phase1", det)
 
 
-def test_validation_determinism(mcp_client, tool_scenarios):
+def test_validation_determinism(mcp_client, tool_scenarios, event_loop):
     """validate_gemara_artifact must produce byte-identical output on every run."""
-    loop = asyncio.get_event_loop()
+    loop = event_loop
 
     scenarios = tool_scenarios
     if not scenarios:

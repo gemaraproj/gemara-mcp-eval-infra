@@ -6,7 +6,7 @@ via stdio transport (spawning a Docker container) and exposes typed methods
 for calling tools, reading resources, and retrieving prompts.
 
 Environment variables:
-    GEMARA_MCP_IMAGE   Docker image (default: ghcr.io/gemaraproj/gemara-mcp:v0.1.0)
+    GEMARA_MCP_IMAGE   Docker image (default: ghcr.io/gemaraproj/gemara-mcp:latest)
     GEMARA_MCP_MODE    Server mode (default: artifact)
     CONTAINER_RUNTIME  Container runtime binary (default: docker)
 """
@@ -23,7 +23,7 @@ from typing import Any
 
 from mcp import ClientSession, StdioServerParameters, stdio_client
 
-DEFAULT_IMAGE = "ghcr.io/gemaraproj/gemara-mcp:v0.1.0"
+DEFAULT_IMAGE = "ghcr.io/gemaraproj/gemara-mcp:latest"
 DEFAULT_MODE = "artifact"
 DEFAULT_RUNTIME = "docker"
 
