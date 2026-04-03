@@ -22,7 +22,7 @@ on:
       gemara_mcp_image:
         description: "gemara-mcp Docker image to evaluate (e.g. ghcr.io/org/gemara-mcp:sha-abc123)"
         required: false
-        default: "ghcr.io/gemaraproj/gemara-mcp:v0.1.0"
+        default: "ghcr.io/gemaraproj/gemara-mcp:latest"
       gemara_schema_ref:
         description: "gemaraproj/gemara git ref for corpus validation (tag, branch, or SHA)"
         required: false
@@ -35,7 +35,7 @@ jobs:
       contents: read
 
     env:
-      GEMARA_MCP_IMAGE: ${{ github.event.inputs.gemara_mcp_image || 'ghcr.io/gemaraproj/gemara-mcp:v0.1.0' }}
+      GEMARA_MCP_IMAGE: ${{ github.event.inputs.gemara_mcp_image || 'ghcr.io/gemaraproj/gemara-mcp:latest' }}
       GEMARA_SCHEMA_REF: ${{ github.event.inputs.gemara_schema_ref || 'main' }}
       GEMARA_SCHEMA_PATH: /tmp/gemara
       CONTAINER_RUNTIME: docker
@@ -89,10 +89,11 @@ jobs:
       #     so a partial failure still produces usable results.
 
       - name: Pull gemara-mcp image
+        id: pull-image
         run: docker pull ${{ env.GEMARA_MCP_IMAGE }}
 
       - name: "Harness: dfah"
-        if: always() && steps['corpus-validate'].outcome == 'success'
+        if: always() && steps['corpus-validate'].outcome == 'success' && steps['pull-image'].outcome == 'success'
         continue-on-error: true
         id: dfah
         run: make eval-dfah
@@ -106,7 +107,7 @@ jobs:
           if-no-files-found: warn
 
       - name: "Harness: mcp-eval"
-        if: always() && steps['corpus-validate'].outcome == 'success'
+        if: always() && steps['corpus-validate'].outcome == 'success' && steps['pull-image'].outcome == 'success'
         continue-on-error: true
         id: mcp-eval
         run: make eval-mcp-eval
@@ -120,7 +121,7 @@ jobs:
           if-no-files-found: warn
 
       - name: "Harness: deepeval"
-        if: always() && steps['corpus-validate'].outcome == 'success'
+        if: always() && steps['corpus-validate'].outcome == 'success' && steps['pull-image'].outcome == 'success'
         continue-on-error: true
         id: deepeval
         run: make eval-deepeval
@@ -139,6 +140,7 @@ jobs:
           echo "| Harness        | Outcome |"
           echo "|----------------|---------|"
           echo "| corpus-validate| ${{ steps['corpus-validate'].outcome }} |"
+          echo "| pull-image     | ${{ steps['pull-image'].outcome }} |"
           echo "| dfah           | ${{ steps.dfah.outcome }} |"
           echo "| mcp-eval       | ${{ steps['mcp-eval'].outcome }} |"
           echo "| deepeval       | ${{ steps.deepeval.outcome }} |"
