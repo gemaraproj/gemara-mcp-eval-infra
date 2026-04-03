@@ -9,13 +9,14 @@ Runs as part of the NFR6 CI gate via `make eval-deepeval`.
 Results are written via pytest-json-report to results/deepeval.json.
 """
 
+import asyncio
 import sys
 from pathlib import Path
 
 import pytest
-import yaml
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from shared.mcp_client import GemaraMCPClient
 
 CORPUS_DIR = Path(__file__).resolve().parent.parent.parent / "corpus"
 
@@ -26,42 +27,45 @@ def _det_config(scenario: dict) -> dict:
     return det.get("phase1", det)
 
 
-def test_validation_determinism(mcp_client, tool_scenarios, event_loop):
-    """validate_gemara_artifact must produce byte-identical output on every run."""
-    loop = event_loop
+def test_validation_determinism(tool_scenarios):
+    """validate_gemara_artifact must produce byte-identical output on every run.
 
-    scenarios = tool_scenarios
-    if not scenarios:
-        with open(CORPUS_DIR / "scenarios.yaml") as f:
-            all_scenarios = yaml.safe_load(f)["scenarios"]
-        scenarios = [s for s in all_scenarios if s["type"] == "tool"]
+    The MCP client is created and torn down within a single asyncio.run() call
+    so that anyio's cancel scopes are entered and exited in the same task.
+    """
 
-    for scenario in scenarios:
-        input_path = CORPUS_DIR / scenario["input_file"]
-        if not input_path.exists():
-            pytest.skip(f"Input file missing: {input_path}")
+    async def run_all():
+        async with GemaraMCPClient() as client:
+            for scenario in tool_scenarios:
+                input_path = CORPUS_DIR / scenario["input_file"]
+                if not input_path.exists():
+                    pytest.skip(f"Input file missing: {input_path}")
 
-        artifact_content = input_path.read_text()
-        definition = scenario["tool_params"]["definition"]
-        det = _det_config(scenario)
-        num_runs = det.get("runs", 20)
-        threshold = det.get("threshold", 1.0)
+                artifact_content = input_path.read_text()
+                definition = scenario["tool_params"]["definition"]
+                det = _det_config(scenario)
+                num_runs = det.get("runs", 20)
+                threshold = det.get("threshold", 1.0)
 
-        async def call_once():
-            result = await mcp_client.call_tool("validate_gemara_artifact", {
-                "artifact_content": artifact_content,
-                "definition": definition,
-            })
-            return result.text
+                outputs = []
+                for _ in range(num_runs):
+                    result = await client.call_tool(
+                        "validate_gemara_artifact",
+                        {
+                            "artifact_content": artifact_content,
+                            "definition": definition,
+                        },
+                    )
+                    outputs.append(result.text)
 
-        outputs = [loop.run_until_complete(call_once()) for _ in range(num_runs)]
+                unique_outputs = set(outputs)
+                # 1.0 when all outputs are identical, lower when they diverge
+                determinism_rate = 1.0 / len(unique_outputs) if unique_outputs else 0.0
 
-        unique_outputs = set(outputs)
-        # determinism_rate: 1.0 when all outputs are identical, lower when they diverge
-        determinism_rate = 1.0 / len(unique_outputs) if unique_outputs else 0.0
+                assert determinism_rate >= threshold, (
+                    f"Scenario {scenario['id']}: determinism_rate={determinism_rate:.4f} "
+                    f"below threshold={threshold} "
+                    f"({len(unique_outputs)} unique outputs across {num_runs} runs)"
+                )
 
-        assert determinism_rate >= threshold, (
-            f"Scenario {scenario['id']}: determinism_rate={determinism_rate:.4f} "
-            f"below threshold={threshold} "
-            f"({len(unique_outputs)} unique outputs across {num_runs} runs)"
-        )
+    asyncio.run(run_all())
