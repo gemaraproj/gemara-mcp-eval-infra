@@ -136,13 +136,44 @@ GEMARA_MCP_IMAGE=ghcr.io/your-org/gemara-mcp:<tag>
 
 The upstream project builds and publishes the image; this repo evaluates it and returns a `PASS` or `FAIL` NFR6 verdict.
 
-In CI, pass the image tag via the `workflow_dispatch` input `gemara_mcp_image`, or set it as a repository variable/secret that the workflow falls back to.
+### Reusable workflow (`workflow_call`)
+
+The `gemara-mcp` release pipeline calls this workflow directly as a post-release
+step, pinning the image and schema ref to the same build:
+
+```yaml
+# In the gemara-mcp release workflow
+jobs:
+  nfr6-eval:
+    needs: release
+    uses: gemaraproj/gemara-mcp-eval-infra/.github/workflows/determinism-check.yml@main
+    with:
+      gemara_mcp_image: "ghcr.io/gemaraproj/gemara-mcp:${{ github.ref_name }}"
+      gemara_schema_ref: "${{ github.ref_name }}"
+```
+
+### Manual dispatch (`workflow_dispatch`)
+
+Pass both `gemara_mcp_image` and `gemara_schema_ref` to pin both the server and
+the schema to the same version:
+
+```
+gemara_mcp_image:  ghcr.io/your-org/gemara-mcp:sha-abc123
+gemara_schema_ref: v1.0.0-rc.2
+```
 
 ---
 
 ## CI
 
-`.github/workflows/determinism-check.yml` runs on every push and PR to `main`.
+`.github/workflows/determinism-check.yml` runs on:
+
+| Trigger | When | Image | Schema ref |
+|---|---|---|---|
+| `push` / `pull_request` | Every push and PR to `main` | `:latest` | `main` |
+| `workflow_call` | Called by `gemara-mcp` release pipeline | Pinned by caller | Pinned by caller |
+| `workflow_dispatch` | Manual trigger via GitHub UI or API | User-specified | User-specified |
+| `schedule` | Weekly (Monday 06:00 UTC) | `:latest` | `main` |
 
 **Step order:**
 1. Install Python deps
@@ -153,14 +184,6 @@ In CI, pass the image tag via the `workflow_dispatch` input `gemara_mcp_image`, 
 6. Run the three harnesses (`dfah`, `mcp-eval`, `deepeval`) — each runs independently with `continue-on-error: true` so a partial failure still uploads available results
 7. Generate and upload NFR6 report
 8. Exit 1 if NFR6 score < 90%
-
-When triggering via `workflow_dispatch`, pass both `gemara_mcp_image` and
-`gemara_schema_ref` to pin both the server and the schema to the same version:
-
-```
-gemara_mcp_image:  ghcr.io/your-org/gemara-mcp:sha-abc123
-gemara_schema_ref: v1.0.0-rc.2
-```
 
 ---
 

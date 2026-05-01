@@ -1,22 +1,29 @@
 name: "NFR6 — Output Determinism"
 
-# NFR6 compliance gate. Runs on every push and PR to main.
-# Exits 1 if the 90% determinism threshold is not met.
+# NFR6 compliance gate — runs on push, PR, schedule, manual dispatch, and
+# as a reusable workflow called by the gemara-mcp release pipeline.
+# Exits 1 if the 90 % determinism threshold is not met.
 # No LLM, no Ollama, no Node.js required.
-#
-# External inputs:
-#   gemara_mcp_image   — the gemara-mcp Docker image to evaluate
-#   gemara_schema_ref  — git ref (tag/branch/SHA) of gemaraproj/gemara to use
-#                        for corpus validation (default: main)
-#
-# The upstream pipeline builds and pushes the image then triggers this workflow,
-# passing the image tag and the schema ref that matches the build.
 
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
+
+  # Called by the gemara-mcp release pipeline after each image push.
+  workflow_call:
+    inputs:
+      gemara_mcp_image:
+        description: "gemara-mcp Docker image to evaluate"
+        type: string
+        required: true
+      gemara_schema_ref:
+        description: "gemaraproj/gemara git ref for corpus validation"
+        type: string
+        required: false
+        default: "main"
+
   workflow_dispatch:
     inputs:
       gemara_mcp_image:
@@ -28,6 +35,11 @@ on:
         required: false
         default: "main"
 
+  # Weekly health check — runs against :latest + schema main to catch
+  # dependency drift, schema changes, and infrastructure shifts between releases.
+  schedule:
+    - cron: "0 6 * * 1"
+
 jobs:
   output-determinism:
     runs-on: ubuntu-latest
@@ -35,8 +47,10 @@ jobs:
       contents: read
 
     env:
-      GEMARA_MCP_IMAGE: ${{ github.event.inputs.gemara_mcp_image || 'ghcr.io/gemaraproj/gemara-mcp:latest' }}
-      GEMARA_SCHEMA_REF: ${{ github.event.inputs.gemara_schema_ref || 'main' }}
+      # workflow_call → inputs.*, workflow_dispatch → github.event.inputs.*,
+      # schedule/push/PR → fall back to defaults.
+      GEMARA_MCP_IMAGE: ${{ inputs.gemara_mcp_image || github.event.inputs.gemara_mcp_image || 'ghcr.io/gemaraproj/gemara-mcp:latest' }}
+      GEMARA_SCHEMA_REF: ${{ inputs.gemara_schema_ref || github.event.inputs.gemara_schema_ref || 'main' }}
       GEMARA_SCHEMA_PATH: /tmp/gemara
       CONTAINER_RUNTIME: docker
 
