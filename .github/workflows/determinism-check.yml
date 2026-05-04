@@ -57,6 +57,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          repository: gemaraproj/gemara-mcp-eval-infra
 
       - name: Set up Python
         uses: actions/setup-python@v5
