@@ -56,12 +56,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           repository: gemaraproj/gemara-mcp-eval-infra
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
 
@@ -116,7 +116,7 @@ jobs:
 
       - name: Upload dfah results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: dfah
           path: results/dfah.json
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload mcp-eval results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: mcp-eval
           path: results/mcp-eval.json
@@ -144,7 +144,7 @@ jobs:
 
       - name: Upload deepeval results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: deepeval
           path: results/deepeval.json
@@ -168,7 +168,7 @@ jobs:
 
       - name: Upload NFR6 report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: nfr6-report
           path: results/nfr6-report.json
