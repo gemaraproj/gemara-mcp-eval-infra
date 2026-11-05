@@ -30,6 +30,5 @@ and communicates over stdin/stdout. Configure via environment variables:
 ## What it tests
 
 - Replays corpus scenarios as structured MCP interactions against the live server
-- **Tool scenarios** (tc-001 to tc-005): Calls `validate_gemara_artifact` and asserts on `$.valid`
-- **Prompt scenarios** (tc-010+): Invokes `threat_assessment` / `control_catalog` prompts and checks for expected keywords
+- **Tool scenarios** (tc-001 to tc-009): Calls `validate_gemara_artifact` and asserts on `$.valid`
 - Reports per-scenario pass/fail with step-level assertion results

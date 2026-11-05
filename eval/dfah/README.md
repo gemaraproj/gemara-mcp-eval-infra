@@ -44,18 +44,16 @@ Use `--simulate` to run offline with fixture data (no Docker required).
 
 ## Benchmarks
 
-Three gemara-specific benchmarks adapted from DFAH's financial domain:
+One gemara-specific benchmark adapted from DFAH's financial domain:
 
 | Benchmark | DFAH Equivalent | Cases | Measures |
 |---|---|---|---|
 | `artifact-validation.json` | DataOps Exceptions | 5 (expandable to 50) | Validation result determinism |
-| `control-suggestion.json` | Compliance Triage | 5 (expandable to 50) | Control selection consistency |
-| `threat-mapping.json` | Portfolio Constraints | 5 (expandable to 50) | Threat identification consistency |
 
 The **artifact-validation** benchmark calls `validate_gemara_artifact` directly
-and works self-contained. The **threat-mapping** and **control-suggestion**
-benchmarks retrieve MCP prompts; full agentic flow (generating artifacts from
-prompts) requires an LLM backend.
+and works self-contained. The threat-mapping and control-suggestion benchmarks
+were removed when the `threat_assessment` and `control_catalog` prompts moved
+from gemara-mcp to skills in gemaraproj/gemara-ai.
 
 ## Key Metrics
 

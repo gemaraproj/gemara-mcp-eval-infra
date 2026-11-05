@@ -237,35 +237,6 @@ async def real_agent_run(client: GemaraMCPClient, case: dict, run_idx: int, benc
                 "output": output,
             }
 
-        elif "component" in case:
-            prompt_name = "threat_assessment" if "threat" in case.get("id", "").lower() or "threat" in case.get("description", "").lower() else "control_catalog"
-            prompt_args = {
-                "component": case["component"],
-                "id_prefix": case.get("id_prefix", ""),
-            }
-
-            result = await client.get_prompt(prompt_name, prompt_args)
-            prompt_text = result.text
-
-            output = {
-                "prompt_name": prompt_name,
-                # "text" key is recognised by FaithfulnessAnalyzer._extract_claims;
-                # using the full text ensures the component name, ID prefix, and any
-                # Gemara IDs injected by the template are available for claim extraction.
-                "text": prompt_text,
-                "prompt_text_length": len(prompt_text),
-                "prompt_preview": prompt_text[:500],
-            }
-
-            return {
-                "case_id": case["id"],
-                "run": run_idx,
-                "steps": [
-                    {"tool_call": {"name": f"prompt:{prompt_name}", "args": prompt_args}},
-                ],
-                "output": output,
-            }
-
         return simulate_agent_run(case, run_idx)
 
     except Exception as exc:

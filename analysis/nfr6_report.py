@@ -129,14 +129,6 @@ def generate_report(results_dir: Path, threshold: float) -> dict:
                 "description": "validate_gemara_artifact produces identical results for identical inputs",
                 "target": 1.0,
             },
-            "threat_generation_determinism": {
-                "description": "threat_assessment prompt suggests same threats for same component",
-                "target": 0.8,
-            },
-            "control_generation_determinism": {
-                "description": "control_catalog prompt suggests same controls for same component",
-                "target": 0.8,
-            },
         },
     }
 
@@ -147,13 +139,13 @@ TOOL_DESCRIPTIONS = {
     "dfah": {
         "full_name": "Determinism-Faithfulness Assurance Harness",
         "what_it_measures": "Calls gemara-mcp directly via MCP protocol, 20 runs per scenario, and compares outputs for exact/Jaccard/structural match.",
-        "dimensions": "Artifact validation, threat mapping, control suggestion",
+        "dimensions": "Artifact validation",
         "failure_mode": "Output drift between repeated runs of the same input",
     },
     "mcp-eval": {
         "full_name": "MCP Eval Scenarios",
         "what_it_measures": "End-to-end MCP scenario execution against gemara-mcp, comparing results to golden outputs.",
-        "dimensions": "Full MCP surface (tools, resources, prompts)",
+        "dimensions": "MCP tool calls",
         "failure_mode": "MCP server responses diverge from golden reference outputs",
     },
     "deepeval": {

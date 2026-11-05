@@ -62,30 +62,6 @@ def corpus_to_mcp_eval_scenarios(scenarios: list, corpus_dir: Path) -> list:
                 "determinism": _phase1_det(scenario),
             })
 
-        elif scenario["type"] == "prompt":
-            params = {k.lower(): v for k, v in scenario.get("prompt_params", {}).items()}
-            mcp_scenarios.append({
-                "id": scenario["id"],
-                "name": scenario["name"],
-                "steps": [
-                    {
-                        "action": "invoke_prompt",
-                        "prompt": scenario["target"],
-                        "arguments": params,
-                        "assertions": [
-                            {
-                                "type": "contains_any",
-                                "values": scenario["expected"].get(
-                                    "threats_must_include",
-                                    scenario["expected"].get("controls_must_include", []),
-                                ),
-                            }
-                        ],
-                    }
-                ],
-                "determinism": _phase1_det(scenario),
-            })
-
     return mcp_scenarios
 
 
@@ -136,29 +112,6 @@ async def execute_step(client: GemaraMCPClient, step: dict) -> dict:
             "action": action,
             "tool": step["tool"],
             "result": result_data,
-            "assertions": assertion_results,
-            "passed": all_passed,
-        }
-
-    elif action == "invoke_prompt":
-        prompt_name = step["prompt"]
-        prompt_args = step.get("arguments", {})
-        prompt_args_str = {k: str(v) for k, v in prompt_args.items()}
-
-        result = await client.get_prompt(prompt_name, prompt_args_str)
-        result_text = result.text
-
-        assertion_results = []
-        for assertion in step.get("assertions", []):
-            passed, msg = check_assertion(assertion, result_text)
-            assertion_results.append({"passed": passed, "message": msg})
-
-        all_passed = all(a["passed"] for a in assertion_results)
-        return {
-            "action": action,
-            "prompt": prompt_name,
-            "result_text": result_text,
-            "result_length": len(result_text),
             "assertions": assertion_results,
             "passed": all_passed,
         }

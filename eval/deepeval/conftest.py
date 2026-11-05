@@ -25,18 +25,6 @@ def tool_scenarios(corpus):
 
 
 @pytest.fixture(scope="session")
-def threat_scenarios(corpus):
-    """Scenarios targeting threat_assessment prompt."""
-    return [s for s in corpus if s["target"] == "threat_assessment"]
-
-
-@pytest.fixture(scope="session")
-def control_scenarios(corpus):
-    """Scenarios targeting control_catalog prompt."""
-    return [s for s in corpus if s["target"] == "control_catalog"]
-
-
-@pytest.fixture(scope="session")
 def golden_outputs():
     """Load all golden output files."""
     goldens = {}
